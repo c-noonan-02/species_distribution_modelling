@@ -51,4 +51,26 @@ occurrence_data2 <- occurrence_data1[!duplicates,]
 # Does the distribution of data look sensible for our selected species? - Yes
 # Do we see evidence of spatial biases in sampling? - potentially some bias towards water sources and capitals?
 
+# 3. DOWNLOADING WORLDCLIM DATA
+output_dir<-"./data/worldclim_data"
+bio_glob<-worldclim_global(var="bio", res=10,path=output_dir, version="2.1")
+# check dimensions
+dim(bio_glob)
+# bio_glob is in the form of a spatraster (spatial raster). Raster = spatial grid. Spratraster combines several grids.
+
+# get the spatial spread of the data we are using
+summary(occurrence_data2$lat)
+summary(occurrence_data2$lon)
+
+extent <- ext(-80, -30, -60, 20)
+predictors <- crop(bio_glob, extent)
+# shorten the names of predictors by taking the 11th and 16th characters...
+names(predictors) <- substring(names(predictors), 11,16)
+
+# can now look at the global climate data - first 9 climate variables
+plot(predictors,1:9)
+
+# then we can add our species data to the plot
+plot(predictors,1)
+points(occurrence_data$lon, occurrence_data$lat, col="maroon", pch=16, cex=0.2)
 
