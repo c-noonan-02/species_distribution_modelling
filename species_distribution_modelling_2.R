@@ -62,7 +62,7 @@ dim(bio_glob)
 summary(occurrence_data2$lat)
 summary(occurrence_data2$lon)
 
-extent <- ext(-80, -30, -60, 20)
+extent <- ext(-90, -30, -60, 20)
 predictors <- crop(bio_glob, extent)
 # shorten the names of predictors by taking the 11th and 16th characters...
 names(predictors) <- substring(names(predictors), 11,16)
@@ -73,4 +73,20 @@ plot(predictors,1:9)
 # then we can add our species data to the plot
 plot(predictors,1)
 points(occurrence_data$lon, occurrence_data$lat, col="maroon", pch=16, cex=0.2)
+
+
+# 4. GENERATING BACKGROUND DATA
+
+# here we only have presence data - no absence data
+# one approach is to sample background data from a region, covering the regions where the species is present and absent
+
+# set the spatial extent to be broadly consistent with that of the study species
+?spatSample
+background <- spatSample(predictors, 5000, "random", na.rm=TRUE, as.points=TRUE, ext=extent)
+
+# plot our points on a map of climwin variable 1 (can do for any of the variables)
+plot(predictors, 1)
+points(background, cex=0.1, col="black")
+
+
 
