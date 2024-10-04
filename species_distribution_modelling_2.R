@@ -112,3 +112,35 @@ summary_data <- data.frame(cbind(coordinates, pb, rbind(present_climate, present
 pairs(summary_data[,4:7], cex=0.1)
 # could extend this to other predictor variables
 
+
+# 6. FITTING A SPECIES DISTRIBUTION MODEL
+
+# Removing rows where climate data are NAs
+summary_data <- subset(summary_data, is.na(bio_1)==F)
+
+spec_data <- as.data.frame(cbind(rep("Tapirus terrestris",length(summary_data[,1])), summary_data))
+names(spec_data)[1:4]<-c("species","longitude","latitude","presabs")
+spec_data<-subset(spec_data,presabs==1)
+backdata<-as.data.frame(cbind(rep("background",length(summary_data[,1])), summary_data))
+names(backdata)[1:4]<-c("","longitude","latitude","presabs")
+backdata<-subset(backdata,presabs==0)
+
+# save data
+output_dir<-"./data"
+write.table(spec_data[,-4],paste(output_dir,"/Tairus_terrestris.csv",sep=""),col.names=T,row.names=F,sep=",")
+write.table(backdata[,-4],paste(output_dir,"/background.csv",sep=""),col.names=T,row.names=F,sep=",")
+
+# build a model, ignoring any data that comes from the same cell
+tapir_model <-MaxEnt(summary_data[,-c(1:3)],summary_data[,3],removeDuplicates=TRUE)
+
+plot(tapir_model)
+# most important variable for tapir is bio_19 (precipitation of coldest quarter), followed by bio_13 (precipitation of wettest month) and bio_4 (temperature seasonality)
+
+# can look at predicted climate suitability globally and see how it matches where the species has been recorded
+# remember with occurrence data no data does not equal absence
+predicted_occurrence <- predict(tapir_model, predictors, args=c("outputformat=raw")) 
+
+par(mfrow=c(2,1))
+plot(predicted_occurrence) # plot climate data
+plot(predicted_occurrence) # plot occurrences on duplicate
+points(coordinates,pch=".", col="black")
