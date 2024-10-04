@@ -11,21 +11,44 @@ library(predicts)
 library(terra)
 
 # choose species - chose Tapirus terrestris
-occurrence_data <- geodata::sp_occurrence("Tapirus", "terrestris*", geo=FALSE,removeZeros=TRUE,start=1,end=10000)
+occurrence_data1 <- geodata::sp_occurrence("Tapirus", "terrestris*", geo=FALSE,removeZeros=TRUE,start=1,end=10000)
 # star - all naming variants
 # geo = TRUE - select only records with lattitude and lingitude recorded
 
 # need to site the DOI - keep the datasetkey variable in your data set
 
-# check the data frame has as many rows as there are occurences
-dim(occurrence_data)
+# check the data frame has as many rows as there are occurrences
+dim(occurrence_data1)
 
 # view data
-occurrence_data[1:10,]
+occurrence_data1[1:10,]
 
 # we can now plot the global distribution to make sure it fits our expectations
-global_map <- world(path = ".") # gives outline of world's polotical boundaries
+global_map <- world(path = ".") # gives outline of world's political boundaries
 # create a plot using this
 plot(global_map, xlim=c(-90,-20), ylim=c(-60,20), col="light yellow", border="grey")
 # add the points
-points(occurrence_data$lon, occurrence_data$lat, col="light blue", pch=20)
+points(occurrence_data1$lon, occurrence_data1$lat, col="light blue", pch=20)
+
+
+# 2. CLEANING UP OCCURRENCE DATA
+
+# It is important to scrutinize the GBIF data first
+
+# cut any data from outside of the their range 
+# do not need to do that here, but will save code for future reference
+# occurrence_data1<-subset(occurrence_data1,lat>0)
+# removes observations from the southern hemisphere
+
+# look for duplicate records and remove them
+duplicates <- duplicated(occurrence_data1[,c("lon", "lat")])
+# sum the total number of duplicates
+sum(duplicates)
+# there are a lot, so let's remove them!
+occurrence_data2 <- occurrence_data1[!duplicates,]
+
+# Questions we should ask ourselves about the occurrence data
+# Does the distribution of data look sensible for our selected species? - Yes
+# Do we see evidence of spatial biases in sampling? - potentially some bias towards water sources and capitals?
+
+
