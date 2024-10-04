@@ -89,4 +89,26 @@ plot(predictors, 1)
 points(background, cex=0.1, col="black")
 
 
+# MATCHING OCCURRENCE AND CLIMATE DATA
+
+# match the climate and occurrence data
+# extract the longitude and lattitudes from the data set
+occurrence_latlon <- cbind(occurrence_data2$lon, occurrence_data2$lat)
+
+# save climate data for where the species is present
+present_climate <- extract(predictors, occurrence_latlon)
+# save climate data for the background data
+present_back <- values(background)
+# extracts the geometry of a Spatvector
+background_lonlat <- geom(background)
+# combine all climate data. In background data x and y correspond to long and lat
+coordinates <- rbind(occurrence_latlon, background_lonlat[,c("x", "y")])
+# first column of dataset is a vector of 1s for presences and 0s for absences
+pb <- c(rep(1, nrow(present_climate)), rep(0, nrow(present_back)))
+# combine presence and background data into single dataframe
+summary_data <- data.frame(cbind(coordinates, pb, rbind(present_climate, present_back)))
+
+# we can examine how correlated the predictor variables are. Highly correlated = statistical issues
+pairs(summary_data[,4:7], cex=0.1)
+# could extend this to other predictor variables
 
