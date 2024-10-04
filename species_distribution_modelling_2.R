@@ -72,7 +72,7 @@ plot(predictors,1:9)
 
 # then we can add our species data to the plot
 plot(predictors,1)
-points(occurrence_data$lon, occurrence_data$lat, col="maroon", pch=16, cex=0.2)
+points(occurrence_data2$lon, occurrence_data2$lat, col="maroon", pch=16, cex=0.2)
 
 
 # 4. GENERATING BACKGROUND DATA
@@ -139,8 +139,47 @@ plot(tapir_model)
 # can look at predicted climate suitability globally and see how it matches where the species has been recorded
 # remember with occurrence data no data does not equal absence
 predicted_occurrence <- predict(tapir_model, predictors, args=c("outputformat=raw")) 
-
+# plot this data
 par(mfrow=c(2,1))
 plot(predicted_occurrence) # plot climate data
 plot(predicted_occurrence) # plot occurrences on duplicate
 points(coordinates,pch=".", col="black")
+par(mfrow=c(1,1))
+
+
+# 7. PREDICTING FUTURE DISTRIBUTION
+
+# we need another element in order to predict future suitability - download future climate data
+?cmip6_world
+output_dir<-"./data/future_clim"
+
+
+future_clim <- cmip6_world(model = "ACCESS-ESM1-5", ssp = "245", time = "2041-2060", var = "bioc", res = 10, path = output_dir)
+future_predictors <- crop(future_clim, extent)
+
+# compare baseline to future climates for any of our variables
+par(mfrow=c(2,1))
+plot(predictors,4)
+plot(future_predictors,4)
+par(mfrow=c(1,1))
+# 19 shows changes
+# 13 shows less change
+# 4 shows some change
+
+
+# generate a prediction of future climate suitability for tapirs
+
+# make header names correspond
+names(future_predictors)<-names(predictors)
+
+# create future predictions using the model of tapirs, and the future climate data
+future_predictions <- predict(tapir_model, future_predictors, args=c("outputformat=raw")) 
+
+par(mfrow=c(2,1))
+plot(predicted_occurrence,main="current")
+plot(future_predictions,main="2050")
+par(mfrow=c(1,1))
+# decline of suitable areas into a small region
+
+# check model AUC etc
+tapir_model
